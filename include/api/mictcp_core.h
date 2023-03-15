@@ -10,9 +10,9 @@
 
 int initialize_components(start_mode sm);
 
-int IP_send(mic_tcp_pdu, mic_tcp_sock_addr);
-int IP_recv(mic_tcp_pdu*, mic_tcp_sock_addr*, unsigned long timeout);
-int app_buffer_get(mic_tcp_payload);
+int IP_send(mic_tcp_pdu, mic_tcp_sock_addr); // envoie des données sur la couche IP
+int IP_recv(mic_tcp_pdu*, mic_tcp_sock_addr*, unsigned long timeout); // récupérer les données que la couche IP a reçu
+int app_buffer_get(mic_tcp_payload); // application récupère les données dans le buffer reception asynchrone --> réception et lecture ne se font pas au même moment => multithreading
 void app_buffer_put(mic_tcp_payload);
 
 void set_loss_rate(unsigned short);
