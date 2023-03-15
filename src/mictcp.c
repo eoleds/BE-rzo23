@@ -73,7 +73,7 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 int mic_tcp_recv (int socket, char* mesg, int max_mesg_size)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    return -1;
+    return 0;
 }
 
 /*
@@ -83,7 +83,7 @@ int mic_tcp_recv (int socket, char* mesg, int max_mesg_size)
  */
 int mic_tcp_close (int socket)
 {
-    printf("[MIC-TCP] Appel de la fonction :  "); printf(__FUNCTION__); printf("\n");
+    printf("[MIC-TCP] Appel de la fonction : "); printf(__FUNCTION__); printf("\n");
     return 0;
 }
 
