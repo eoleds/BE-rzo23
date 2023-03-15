@@ -30,7 +30,7 @@ pthread_cond_t buffer_empty_cond;
 /*************************
  * Fonctions Utilitaires *
  *************************/
-int initialize_components(start_mode mode)
+int initialize_components(start_mode mode) // Prépare le socket à l'envoyer en TCP, elle vérifie qu'on soit en envoie et en TCP, la fonction créée un socket de type UDP. MICTCP au dessus de IP, mais ici au dessus de UDP. Joue donc le rôle de IP.  
 {
     int bnd;
     struct hostent * hp;
@@ -86,7 +86,7 @@ int initialize_components(start_mode mode)
 
     if((initialized == 1) && (mode == SERVER))
     {
-        pthread_create (&listen_th, NULL, listening, "1");
+        pthread_create (&listen_th, NULL, listening, "1"); // crée un thread au niveau du serveur
     }
 
     return initialized;
@@ -94,7 +94,7 @@ int initialize_components(start_mode mode)
 
 
 
-int IP_send(mic_tcp_pdu pk, mic_tcp_sock_addr addr)
+int IP_send(mic_tcp_pdu pk, mic_tcp_sock_addr addr) // vérifie d'abord que le socket est déjà crée (= est-ce que la couche IP est prête à envoyer les données). Si oui, envoie directement les données à l'appli.
 {
 
     int result = 0;
@@ -115,7 +115,7 @@ int IP_send(mic_tcp_pdu pk, mic_tcp_sock_addr addr)
     return result;
 }
 
-int IP_recv(mic_tcp_pdu* pk, mic_tcp_sock_addr* addr, unsigned long timeout)
+int IP_recv(mic_tcp_pdu* pk, mic_tcp_sock_addr* addr, unsigned long timeout) // vérifie si la couche IP et prête et se met en attente de réception. Récupère les données.
 {
     int result = -1;
 
@@ -219,7 +219,7 @@ int mic_tcp_core_send(mic_tcp_payload buff)
     return result;
 }
 
-int app_buffer_get(mic_tcp_payload app_buff)
+int app_buffer_get(mic_tcp_payload app_buff)  // vérouille à la ressource, quand fini, copie des données dans le buffer des données de l'appli. ensuite on libère les données.
 {
     /* A pointer to a buffer entry */
     struct app_buffer_entry * entry;
@@ -262,7 +262,7 @@ int app_buffer_get(mic_tcp_payload app_buff)
     return result;
 }
 
-void app_buffer_put(mic_tcp_payload bf)
+void app_buffer_put(mic_tcp_payload bf) // met les données dans le buffer.
 {
     /* Prepare a buffer entry to store the data */
     struct app_buffer_entry * entry = malloc(sizeof(struct app_buffer_entry));

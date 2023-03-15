@@ -19,6 +19,7 @@ while getopts "pst:" o; do
         p)
             puits=true
             ;;
+            
         s)
             sourc=true
             ;;
