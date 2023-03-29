@@ -49,6 +49,8 @@ int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
  * Permet de réclamer l’envoi d’une donnée applicative
  * Retourne la taille des données envoyées, et -1 en cas d'erreur
  */
+pe = 0;
+
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
     
@@ -59,9 +61,18 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
     //remplir le payload
     pdu.payload.size = mesg_size;
     pdu.payload.data = mesg;
+    pdu.header.seq_num = pe; // DT.nseq <-- pe
+    // activation timer
+    struct timeval tv;
+    tv.tv_sec = timeout / 1000;
+    tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
+    while (tv > 0) {
+        result = IP_send(pdu,addr);
+        return result;
+    }
     //mettre tous les flags a 0
-    result = IP_send(pdu,addr);
-    return result;
+    
+    pe = (pe +1)%2
 }
 
 /*
