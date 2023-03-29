@@ -7,12 +7,12 @@
  */
 int mic_tcp_socket(start_mode sm)
 {
-   int result = -1;
    printf("[MIC-TCP] Appel de la fonction: ");  printf(__FUNCTION__); printf("\n");
-   result = initialize_components(sm); /* Appel obligatoire */
+   mic_tcp_sock sock;
+   sock.fd = 0;
+   initialize_components(sm); /* Appel obligatoire */
    set_loss_rate(0);
-
-   return result;
+   return 0;
 }
 
 /*
@@ -49,19 +49,28 @@ int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
  * Permet de réclamer l’envoi d’une donnée applicative
  * Retourne la taille des données envoyées, et -1 en cas d'erreur
  */
+
+int pe = 0;
+
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
-    
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    int result = -1;
     mic_tcp_pdu pdu;
+    int result = -1;
     mic_tcp_sock_addr addr = {0};
+    //Remplir le header
+    pdu.header.seq_num = pe;
+    pdu.header.ack_num = 0;
     //remplir le payload
     pdu.payload.size = mesg_size;
     pdu.payload.data = mesg;
     //mettre tous les flags a 0
     result = IP_send(pdu,addr);
+    mic_tcp_pdu ACK_PDU;
+    mic_tcp_sock_addr addr_ACK;
+    IP_recv(&ACK_PDU, &addr_ACK, 2000);
     return result;
+    
 }
 
 /*
@@ -70,6 +79,8 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
  * Retourne le nombre d’octets lu ou bien -1 en cas d’erreur
  * NB : cette fonction fait appel à la fonction app_buffer_get()
  */
+
+
 int mic_tcp_recv (int socket, char* mesg, int max_mesg_size)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
@@ -98,8 +109,22 @@ int mic_tcp_close (int socket)
  * le buffer de réception du socket. Cette fonction utilise la fonction
  * app_buffer_put().
  */
+
+int pa = 0;
+
 void process_received_PDU(mic_tcp_pdu pdu, mic_tcp_sock_addr addr)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    app_buffer_put(pdu.payload);
+    mic_tcp_pdu ACK_PDU;
+    ACK_PDU.header.ack = '1';
+    if (pdu.header.seq_num == pa){
+        app_buffer_put(pdu.payload);
+        pa = (pa + 1)%2;
+        ACK_PDU.header.ack_num = pa;
+        IP_send(ACK_PDU, addr);
+    }
+    else{
+        ACK_PDU.header.ack_num = pa;
+        IP_send(ACK_PDU, addr);
+    }
 }
