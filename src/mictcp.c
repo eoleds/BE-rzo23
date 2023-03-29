@@ -61,7 +61,7 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
     pdu.payload.data = mesg;
     //mettre tous les flags a 0
     result = IP_send(pdu,addr);
-    return  result;
+    return result;
 }
 
 /*
@@ -73,7 +73,12 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 int mic_tcp_recv (int socket, char* mesg, int max_mesg_size)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    return 0;
+    int result = -1;
+    mic_tcp_pdu pdu;
+    pdu.payload.size = max_mesg_size;
+    pdu.payload.data = mesg;
+    result = app_buffer_get(pdu.payload);
+    return result;
 }
 
 /*
