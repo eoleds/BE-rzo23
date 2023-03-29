@@ -49,6 +49,8 @@ int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
  * Permet de réclamer l’envoi d’une donnée applicative
  * Retourne la taille des données envoyées, et -1 en cas d'erreur
  */
+int pe = 0;
+
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
@@ -56,7 +58,6 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
     int result = -1;
     mic_tcp_sock_addr addr = {0};
     //Remplir le header
-    pdu.header.seq_num = pe;
     pdu.header.ack_num = 0;
     //remplir le payload
     pdu.payload.size = mesg_size;
