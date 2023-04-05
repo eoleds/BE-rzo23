@@ -54,23 +54,12 @@ int pe = 0;
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    mic_tcp_pdu pdu;
     int result = -1;
+    mic_tcp_pdu pdu;
     mic_tcp_sock_addr addr = {0};
-    //Remplir le header
-    pdu.header.ack_num = 0;
     //remplir le payload
     pdu.payload.size = mesg_size;
     pdu.payload.data = mesg;
-    pdu.header.seq_num = pe; // DT.nseq <-- pe
-    // activation timer
-    struct timeval tv;
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
-    while (tv > 0) {
-        result = IP_send(pdu,addr);
-        return result;
-    }
     //mettre tous les flags a 0
     result = IP_send(pdu,addr);
     return result;
@@ -83,6 +72,7 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
  * NB : cette fonction fait appel à la fonction app_buffer_get()
  */
 
+int pa = 0;
 
 int mic_tcp_recv (int socket, char* mesg, int max_mesg_size)
 {
@@ -113,7 +103,7 @@ int mic_tcp_close (int socket)
  * app_buffer_put().
  */
 
-int pa = 0;
+
 
 void process_received_PDU(mic_tcp_pdu pdu, mic_tcp_sock_addr addr)
 {
