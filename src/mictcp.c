@@ -76,7 +76,7 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
             result = IP_send(pdu,addr_pk);
             time = IP_recv(&pk, &addr_pk, 1000);
         }
-        
+
     return result;
 }
 
