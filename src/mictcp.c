@@ -53,25 +53,30 @@ int pe = 0;
 
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
+    int bool = 0;
     printf("[MIC-TCP] Appel de la fonction: "); printf(__FUNCTION__); printf("\n");
-    mic_tcp_pdu pdu;
-    int result = -1;
-    mic_tcp_sock_addr addr = {0};
-    //Remplir le header
-    pdu.header.ack_num = 0;
-    //remplir le payload
-    pdu.payload.size = mesg_size;
-    pdu.payload.data = mesg;
-    pdu.header.seq_num = pe; // DT.nseq <-- pe
-    // activation timer
-    struct timeval tv;
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout - tv.tv_sec * 1000) * 1000;
-    while (tv > 0) {
-        result = IP_send(pdu,addr);
-        return result;
+        mic_tcp_pdu pdu;
+        int result = -1;
+        mic_tcp_sock_addr addr = {0};
+        //Remplir le header
+        pdu.header.ack_num = 0;
+        //remplir le payload
+        pdu.payload.size = mesg_size;
+        pdu.payload.data = mesg;
+        pdu.header.seq_num = pe; // DT.nseq <-- pe
+        app_buffer_put(pdu.payload);
+    while (bool != 1){
+        // activation timer
+        mic_tcp_pdu pk;
+        mic_tcp_sock_addr addr_pk = {0};
+        IP_send(pdu,addr);
+        IP_recv(&pk, &addr_pk, 1000);
+        pe = (pe+1)%2;
+        if (pk.header.ack ==1){
+            bool = 1;
+        }
     }
-    //mettre tous les flags a 0
+    app_buffer_get(pdu.payload);
     result = IP_send(pdu,addr);
     return result;
 }
