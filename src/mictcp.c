@@ -49,7 +49,14 @@ int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
  * Permet de réclamer l’envoi d’une donnée applicative
  * Retourne la taille des données envoyées, et -1 en cas d'erreur
  */
-int pe = 0;
+int pe = 0; //prochain Paquet à Emettre
+
+//On compte les paquets envoyés et reçus
+float paquets_env;
+float paquets_rec;
+
+//Taux de perte qu'on s'autorise
+float taux_perte = 0.2;
 
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
@@ -61,7 +68,7 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
         pdu.payload.data = mesg;
         pdu.header.seq_num = pe; // DT.nseq <-- pe
 
-        mic_tcp_pdu pk;
+        mic_tcp_pdu pk; //PDU de l'ACK à recevoir
         mic_tcp_sock_addr addr_pk;
 
         addr_pk.ip_addr = "localhost";
@@ -69,15 +76,40 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
         addr_pk.port = htons(API_CS_Port);
 
         // activation timer
-        int result = IP_send(pdu,addr_pk);
-        int time = IP_recv(&pk, &addr_pk, 10);
+        int env = IP_send(pdu,addr_pk);
+        int rec = IP_recv(&pk, &addr_pk, 10);
+
         pe = (pe+1)%2;
-        while (pe != pk.header.ack_num || time == -1){
-            result = IP_send(pdu,addr_pk);
-            time = IP_recv(&pk, &addr_pk, 1000);
+        int envoi_a_faire = 1;
+        while (envoi_a_faire){
+            env = IP_send(pdu,addr_pk);
+            //On considère d'abord l'envoi réussi
+            envoi_a_faire = 0;
+            //On attend de recevoir un ack
+            rec = IP_recv(&pk, &addr_pk, 1);
+
+            //Si on n'a rien rçu :
+            if(rec == -1){
+                if (paquets_rec / paquets_env < (1.0 - taux_perte)){
+                    envoi_a_faire = 1; //Perte non tolérable, on a besoin de renvoyer
+                }
+                // Sinon, on ne fait rien <-> on 'perd' le paquet
+            }
+            else{
+                if (pk.header.ack_num == pe){ //Le paquet reçu est celui qu'on a envoyé
+                    paquets_rec++;
+                }
+                else{
+                    //Ce n'est pas le bon ; est-ce que la perte du paquet envoyé serait tolérable ?
+                    if(paquets_rec / paquets_env < (1.0 - taux_perte)){ //Non
+                        envoi_a_faire = 1; //On renvoie
+                    }
+                    //Sinon, on s'autorise à perdre le paquet
+                }
+            }
         }
 
-    return result;
+    return env;
 }
 
 /*
