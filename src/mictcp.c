@@ -79,6 +79,9 @@ int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
         int env = IP_send(pdu,addr_pk);
         int rec = IP_recv(&pk, &addr_pk, 10);
 
+        //On s'apprête à envoyer un paquet
+        paquets_env++;
+
         pe = (pe+1)%2;
         int envoi_a_faire = 1;
         while (envoi_a_faire){
