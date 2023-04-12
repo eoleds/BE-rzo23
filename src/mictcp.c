@@ -56,7 +56,7 @@ float paquets_env;
 float paquets_rec;
 
 //Taux de perte qu'on s'autorise
-float taux_perte = 0.2;
+float taux_perte = 0.5;
 
 int mic_tcp_send (int mic_sock, char* mesg, int mesg_size)
 {
