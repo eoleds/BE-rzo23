@@ -43,6 +43,20 @@ int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
 {
     printf("[MIC-TCP] Appel de la fonction: ");  printf(__FUNCTION__); printf("\n");
     return 0;
+    mic_tcp_pdu pdu;
+    //remplir le header
+    pdu.header.syn = '1';
+
+    mic_tcp_pdu rec; //pdu qui va recevoir
+
+    //activation timer
+    int result = IP_send(pdu, addr);
+    int time = IP_recv(&rec, &addr, 10);
+    while (time == -1){
+        result = IP_send(pdu, addr);
+        time = IP_recv(&rec, &addr, 1000);
+    }
+    return result;
 }
 
 /*
