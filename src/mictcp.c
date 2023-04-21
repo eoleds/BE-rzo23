@@ -47,18 +47,33 @@ int mic_tcp_accept(int socket, mic_tcp_sock_addr* addr)
  * Permet de réclamer l’établissement d’une connexion
  * Retourne 0 si la connexion est établie, et -1 en cas d’échec
  */
+int pe = 0; // on définit le prochain paquet à emettre
 int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
 {
     printf("[MIC-TCP] Appel de la fonction: ");  printf(__FUNCTION__); printf("\n");
     //IP send et receive
     return 0;
+    mic_tcp_pdu pdu;
+    //remplir le header
+    pdu.header.syn = '1';
+    pdu.header.seq_num = pe;
+
+    mic_tcp_pdu rec; //pdu qui va recevoir
+
+    //activation timer
+    int result = IP_send(pdu, addr);
+    int time = IP_recv(&rec, &addr, 10);
+    while (time == -1){
+        result = IP_send(pdu, addr);
+        time = IP_recv(&rec, &addr, 1000);
+    }
+    return result;
 }
 
 /*
  * Permet de réclamer l’envoi d’une donnée applicative
  * Retourne la taille des données envoyées, et -1 en cas d'erreur
  */
-int pe = 0; //prochain Paquet à Emettre
 
 //On compte les paquets envoyés et reçus
 float paquets_env;
