@@ -29,9 +29,17 @@ int mic_tcp_bind(int socket, mic_tcp_sock_addr addr)
  * Met le socket en état d'acceptation de connexions
  * Retourne 0 si succès, -1 si erreur
  */
+
+int connexion_etablie = 0;
+
 int mic_tcp_accept(int socket, mic_tcp_sock_addr* addr)
 {
     printf("[MIC-TCP] Appel de la fonction: ");  printf(__FUNCTION__); printf("\n");
+    while(!connexion_etablie){   
+        //attente de l'etablissement de connexion
+    }
+    mic_tcp_pdu rec;
+    IP_recv(&rec, addr, 1); //Attente de reception de l'ACK
     return 0;
 }
 
@@ -42,6 +50,7 @@ int mic_tcp_accept(int socket, mic_tcp_sock_addr* addr)
 int mic_tcp_connect(int socket, mic_tcp_sock_addr addr)
 {
     printf("[MIC-TCP] Appel de la fonction: ");  printf(__FUNCTION__); printf("\n");
+    //IP send et receive
     return 0;
 }
 
@@ -165,6 +174,9 @@ void process_received_PDU(mic_tcp_pdu pdu, mic_tcp_sock_addr addr)
         pa = (pa + 1)%2;
         ACK_PDU.header.ack_num = pa;
         IP_send(ACK_PDU, addr);
+        if (pdu.header.syn == '1'){
+            connexion_etablie = 1;
+        }
     }
     else{
         ACK_PDU.header.ack_num = pa;
